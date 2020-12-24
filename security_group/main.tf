@@ -1,3 +1,4 @@
+# リスト7.20 セキュリティグループモジュールの定義
 variable "name" {}
 variable "vpc_id" {}
 variable "port" {}
