@@ -1,6 +1,6 @@
 # リスト6.4
 resource "aws_s3_bucket" "alb_log" {
-  bucket = "alb-log-pragmatic-terraform-on-aws"
+  bucket = "alb-log-19960705"
 
   lifecycle_rule {
     enabled = true
