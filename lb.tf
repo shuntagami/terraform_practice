@@ -23,10 +23,6 @@ resource "aws_lb" "example" {
   ]
 }
 
-output "alb_dns_name" {
-  value = aws_lb.example.dns_name
-}
-
 # リスト8.3 HTTP リスナーの定義
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.example.arn
@@ -83,4 +79,25 @@ resource "aws_lb_target_group" "example" {
   }
 
   depends_on = [aws_lb.example]
+}
+
+# これをつけると「The target group does not have an associated load balancer」が解消された
+resource "aws_lb_listener_rule" "example" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.example.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/*"]
+    }
+  }
+}
+
+output "alb_dns_name" {
+  value = aws_lb.example.dns_name
 }
