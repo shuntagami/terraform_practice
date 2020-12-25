@@ -1,0 +1,49 @@
+# リスト8.5 ホストゾーンのリソース定義
+resource "aws_route53_zone" "gototouring" {
+  name = "gototouring.work"
+}
+
+data "aws_route53_zone" "gototouring" {
+  name = "gototouring.work"
+}
+
+# リスト8.6 ALB のDNS レコードの定義
+resource "aws_route53_record" "gototouring" {
+  zone_id = data.aws_route53_zone.gototouring.zone_id
+  name    = data.aws_route53_zone.gototouring.name
+  type    = "A"
+  alias {
+    name                   = aws_lb.example.dns_name
+    zone_id                = aws_lb.example.zone_id
+    evaluate_target_health = true
+  }
+}
+
+# リスト8.7 SSL 証明書の定義
+resource "aws_acm_certificate" "gototouring" {
+  domain_name               = data.aws_route53_zone.gototouring.name
+  subject_alternative_names = []
+  validation_method         = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# リスト8.8 SSL 証明書の検証⽤レコードの定義
+resource "aws_route53_record" "gototouring_certificate" {
+  for_each = {
+    for dvo in aws_acm_certificate.gototouring.domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
+
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = data.aws_route53_zone.gototouring.zone_id
+}
