@@ -125,3 +125,8 @@ resource "aws_nat_gateway" "nat_gateway_1" {
   depends_on    = [aws_internet_gateway.example]
 }
 
+# リスト13.3 DB サブネットグループの定義
+resource "aws_db_subnet_group" "example" {
+  name       = "example"
+  subnet_ids = [aws_subnet.private_0.id, aws_subnet.private_1.id]
+}
